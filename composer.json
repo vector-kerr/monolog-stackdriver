@@ -1,0 +1,21 @@
+{
+    "name": "vector88/monolog-stackdriver",
+    "description": "Monolog Handler for Google Stackdriver Logging",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Daniel 'Vector' Kerr",
+            "email": "vector.kerr@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6",
+        "google/cloud-logging": "^1",
+        "monolog/monolog": "^1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Vector88\\Monolog\\Stackdriver": "src/Vector88/Monolog/Stackdriver"
+        }
+    }
+}
