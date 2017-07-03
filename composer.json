@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Vector88\\Monolog\\Stackdriver": "src/Vector88/Monolog/Stackdriver"
+            "Vector88\\Monolog\\Stackdriver\\": "src/Vector88/Monolog/Stackdriver"
         }
     }
 }
