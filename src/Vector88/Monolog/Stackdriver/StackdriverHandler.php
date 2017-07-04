@@ -3,7 +3,7 @@
 namespace Vector88\Monolog\Stackdriver;
 
 use Monolog\Logger;
-use Monolog\Handler\PsrHandler;
+use Monolog\Handler\AbstractHandler;
 use Psr\Log\LoggerInterface;
 
 use Google\Cloud\ServiceBuilder;
@@ -12,7 +12,7 @@ use Google\Cloud\ServiceBuilder;
 // Updated to use a PSR handler, because it makes sense!
 // As per https://stackoverflow.com/a/42103040/2369276
 //
-class StackdriverHandler extends PsrHandler {
+class StackdriverHandler extends AbstractHandler {
 
     /**
      * @var string
@@ -35,11 +35,15 @@ class StackdriverHandler extends PsrHandler {
      * @param string  $loggerName Google Logging Logger Name
      */
     public function __construct( $loggerName, $level = Logger::DEBUG, $bubble = true ) {
-        parent::__construct( null, $level, $bubble );
-        $this->_initGoogleLogger( $projectId, $loggerName );
+        parent::__construct( $level, $bubble );
+        $this->_initGoogleLogger( $loggerName );
     }
 
-    protected function _initGoogleLogger( $projectId, $loggerName ) {
+    /**
+     * Initialize the connection to the google stackdriver logging system
+     * @param  string $loggerName The name of the logger to connect to
+     */
+    protected function _initGoogleLogger( $loggerName ) {
         $cloud = new ServiceBuilder();
         $this->_gcl = $cloud->logging();
     }
