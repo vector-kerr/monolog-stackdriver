@@ -6,7 +6,7 @@ use Monolog\Logger;
 use Monolog\Handler\PsrHandler;
 use Psr\Log\LoggerInterface;
 
-use Google\Cloud\Logging\LoggingClient;
+use Google\Cloud\ServiceBuilder;
 
 //
 // Updated to use a PSR handler, because it makes sense!
@@ -14,8 +14,14 @@ use Google\Cloud\Logging\LoggingClient;
 //
 class StackdriverHandler extends PsrHandler {
 
-    protected $_projectId;
+    /**
+     * @var string
+     */
     protected $_loggerName;
+
+    /**
+     * @var \Google\Cloud\Logging\Logger
+     */
     protected $_gcl;
 
     /**
@@ -26,18 +32,16 @@ class StackdriverHandler extends PsrHandler {
     /**
      * {@inheritDoc}
      *
-     * @param string  $projectId  Google Logging Project ID
      * @param string  $loggerName Google Logging Logger Name
      */
-    public function __construct( $projectId, $loggerName, $level = Logger::DEBUG, $bubble = true ) {
+    public function __construct( $loggerName, $level = Logger::DEBUG, $bubble = true ) {
         parent::__construct( $level, $bubble );
         $this->_initGoogleLogger( $projectId, $loggerName );
     }
 
     protected function _initGoogleLogger( $projectId, $loggerName ) {
-        $this->_projectId = $projectId;
-        $this->_loggerName = $loggerName;
-        $this->_gcl = new LoggingClient( [ 'projectId' => $this->_projectId ] );
+        $cloud = new ServiceBuilder();
+        $this->_gcl = $cloud->logging();
     }
 
     /**
