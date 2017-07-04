@@ -3,15 +3,25 @@
 namespace Vector88\Monolog\Stackdriver;
 
 use Monolog\Logger;
-use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\Handler\PsrHandler;
+use Psr\Log\LoggerInterface;
+
 use Google\Cloud\Logging\LoggingClient;
 
-class StackdriverHandler extends AbstractProcessingHandler {
+//
+// Updated to use a PSR handler, because it makes sense!
+// As per https://stackoverflow.com/a/42103040/2369276
+//
+class StackdriverHandler extends PsrHandler {
 
     protected $_projectId;
     protected $_loggerName;
     protected $_gcl;
-    protected $_logger;
+
+    /**
+     * @var LoggerInterface[]
+     */
+    protected $loggers;
 
     /**
      * {@inheritDoc}
@@ -28,22 +38,54 @@ class StackdriverHandler extends AbstractProcessingHandler {
         $this->_projectId = $projectId;
         $this->_loggerName = $loggerName;
         $this->_gcl = new LoggingClient( [ 'projectId' => $this->_projectId ] );
-        $this->_logger = $this->_gcl->logger( $this->_loggerName );
+    }
+
+    /**
+     * Retrieve a logger by the given channel name
+     * @param  string $channel The channel name
+     * @return LoggerInterface The logger for the given channel
+     */
+    public function getLogger( $channel ) {
+        if( !isset( $this->loggers[ $channel ] ) ) {
+            $labels = [ 'context' => $channel ];
+            $logger = $this->_gcl->psrLogger( $this->_loggerName, [ 'labels' => $labels ] );
+            $this->loggers[ $channel ] = $logger;
+        }
+
+        return $this->loggers[ $channel ];
     }
 
     /**
      * {@inheritDoc}
      */
-    public function write( array $record ) {
-        // $message = $record[ 'message' ];
-        // $context = $record[ 'context' ];
-        $this->_logger->write( $this->_logger->entry( $record ) );
+    public function handle( array $record ) {
+        if( !$this->isHandling( $record ) ) {
+            return false;
+        }
+
+        $channel = $record[ 'channel' ];
+        $level = strtolower( $record[ 'level_name' ] );
+        $message = $record[ 'message' ];
+        $context = $record[ 'context' ];
+
+        $logger = $this->getLogger( $channel );
+        $logger->log( $level, $message, $context );
+
+        return ( false === $this->bubble );
     }
 
+    /**
+     * Get the Project ID associated with this Stackdriver Handler
+     * @return string The Project ID
+     */
     public function getProjectId() {
         return $this->_projectId;
     }
 
+    /**
+     * Get the Logger Name associated with this Stackdriver Handler
+     * @return string The Logger Name
+     */
     public function getLoggerName() {
         return $this->_loggerName;
     }
