@@ -35,8 +35,8 @@ class StackdriverHandler extends PsrHandler {
      * @param string  $loggerName Google Logging Logger Name
      */
     public function __construct( $loggerName, $level = Logger::DEBUG, $bubble = true ) {
-        parent::__construct( $level, $bubble );
         $this->_initGoogleLogger( $projectId, $loggerName );
+        parent::__construct( $this->_gcl, $level, $bubble );
     }
 
     protected function _initGoogleLogger( $projectId, $loggerName ) {
