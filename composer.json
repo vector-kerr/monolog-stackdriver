@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=5.5",
-        "google/cloud": "^0.33",
+        "google/cloud": "~0.33",
         "google/cloud-logging": "^1",
         "monolog/monolog": "^1"
     },
